@@ -1,0 +1,24 @@
+// やりたいこと:
+//
+//         テキスト
+//            ｜
+//            ｜
+//            ｜
+//            ｜
+//            ^^
+//           この線を↑方向に追加していくのを、キー一発押すだけで次々行いたい.
+
+$YOUR_CHAR = "｜";
+
+#length_of_your_char = strlen($YOUR_CHAR);
+#loopcnt = 0;
+while(#loopcnt<#length_of_your_char){
+	delete;
+	#loopcnt = #loopcnt + 1;
+}
+
+insert $YOUR_CHAR;
+
+left;
+
+up;

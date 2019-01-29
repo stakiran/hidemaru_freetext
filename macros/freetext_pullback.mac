@@ -1,0 +1,87 @@
+// やりたいこと:      I はキャレットとする.
+//
+//      てすと     I    ほげhoge                   ★ (1) 元々はこの状態から
+//      てすと     てすとてすとaI    ほげhoge      ★ (2) 打った分だけ「ほげhoge」部分がズレた
+//                                                 ★ このズレを delete 連発でなくしたい
+//                                                 ★ この場合は13文字分増えたから13回 BS すればいい
+//      てすと     I    ほげhoge                   ★ (3) 13回 BS して、「ほげhoge」が元に戻った
+
+if(x == 0){
+	endmacro;
+}
+
+#CODE_SPACE = 32;
+#CODE_TAB   = 9;
+$currentline = gettext(0, y, linelen ,y, 0);
+#original_x = x;
+#original_y = y;
+
+// [1/3] カーソルの左側
+// 何文字増えたか(delete押して帳尻合わせる回数)を調べる.
+// -----------------------------------------------------
+
+// delete_count だと全角文字(2文字占めるので delete 2回必要)考慮できないので,
+// 文字数長ベースの length_of_inserted_string を導入した.
+
+#length_of_inserted_string = 0;
+#delete_count = 0;
+#loopcnt = 0;
+while(1){
+	if(x == 0){
+		#length_of_inserted_string = #original_x;
+		break;
+	}
+
+	left;
+
+	#code_pointed_by_x = code;
+	if(#code_pointed_by_x == #CODE_SPACE || #code_pointed_by_x == #CODE_TAB){
+		#length_of_inserted_string = #original_x - (x + 1);
+		break;
+	}
+
+	#delete_count = #delete_count + 1;
+	#loopcnt = #loopcnt + 1;
+}
+
+// カーソル動かした分を復元
+moveto #original_x, #original_y;
+
+// [2/3] カーソルの右側
+// 空白にぶつかるまでの距離を調べる.
+// ---------------------------------
+
+// もし delete 押す回数よりも短い → delete 押すと一部消えちゃうので何もしない.
+// これを判断するための計算.
+
+#distance_for_anychar = 0;
+#loopcnt = 0;
+while(1){
+	#code_pointed_by_x = code;
+	if(#code_pointed_by_x != #CODE_SPACE){
+		break;
+	}
+	#distance_for_anychar = #distance_for_anychar + 1;
+
+	right;
+	if(y != #original_y){
+		// カーソル行位置変わった = 行末超えたのでそこでおしまい
+		break;
+	}
+
+	#loopcnt = #loopcnt + 1;
+}
+
+// カーソル動かした分を復元
+moveto #original_x, #original_y;
+
+// [3/3] 揃ったので帳尻合わせる
+// ----------------------------
+
+if(#distance_for_anychar>=#length_of_inserted_string ){
+	#loopcnt = 0;
+	while(#loopcnt<#length_of_inserted_string ){
+		delete;
+		#loopcnt = #loopcnt + 1;
+	}
+}
