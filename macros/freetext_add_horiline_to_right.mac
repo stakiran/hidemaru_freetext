@@ -1,16 +1,44 @@
 // やりたいこと:
 //
-//         テキスト―――― テキスト
+// Case1.
+//         テキスト――――I テキスト
 //                 ^^^^^^^^
 //           この線を → 方向に追加していくのを、キー一発押すだけで次々行いたい.
+//           insert だけだと右側がずれるので, delete で調整(pullback)が必要.
+//
+// Case2.
+//         テキスト   ―――――――I
+//
+//           右側にテキストがないケース.
+//           pullback すると次行が上に来てしまうので pullback しちゃダメ.
 
 $YOUR_CHAR = "―";
-
 #length_of_your_char = strlen($YOUR_CHAR);
+
+#original_x = x;
+$currentline = gettext(0, y, linelen ,y, 0);
+#length_of_checkee_range = strlen($currentline) - #original_x;
+
+#use_pullback = false;
+
+// Case1. かどうかを調べる.
+// 半角スペースか改行以外の文字とぶつかる = Case1
 #loopcnt = 0;
-while(#loopcnt<#length_of_your_char){
-	delete;
+while(#loopcnt < #length_of_checkee_range){
+	$curchar = midstr($currentline, #original_x + #loopcnt, 1);
+	if($curchar != "\n" && $curchar != " "){
+		#use_pullback = true;
+		break;
+	}
 	#loopcnt = #loopcnt + 1;
+}
+
+if(#use_pullback){
+	#loopcnt = 0;
+	while(#loopcnt<#length_of_your_char){
+		delete;
+		#loopcnt = #loopcnt + 1;
+	}
 }
 
 insert $YOUR_CHAR;
